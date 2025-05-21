@@ -1,61 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>주차짱</title>
-<style>
-#map {
-width:100%;
-height:600px;
-}
-</style>
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db558d1791180641bf3757dcfdb7f9c7&autoload=false"></script>
+  <meta charset="utf-8">
+  <title>카카오 지도에 주차장 표시</title>
+  <style>
+    #map { width: 100%; height: 600px; }
+  </style>
+  <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db558d1791180641bf3757dcfdb7f9c7"></script>
 </head>
 <body>
 
 <div id="map"></div>
 
 <script>
-window.addEventListener('DOMContentLoaded',function(){
-kakao.maps.load(function(){
-var map = new kakao.maps.Map(document.getElementById("map"), {
-center: new kakao.maps.LatLng(37.565784,126.938572),
-level:4
-});
+  var container = document.getElementById('map');
+  var options = {
+    center: new kakao.maps.LatLng(37.565784, 126.938572), // 연세대
+    level: 4
+  };
+  var map = new kakao.maps.Map(container, options);
 
-function d(a,b,c,d){
-var r=6371;
-var dx=(c-a)*Math.PI/180;
-var dy=(d-b)*Math.PI/180;
-var x=Math.sin(dx/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dy/2)**2;
-return r*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
+  fetch("https://apis.data.go.kr/15099883/openapi/villageParking/getVilageParkngInfo?serviceKey=bL5a%2BiEd3PpHNiApUoKA3l6lC5%2BPqZdMDxC2wM6P063m3wbyA3Y0FsF3h9EH08eUh9M2qX7KiuSB0OpnkxAgKQ%3D%3D&pageNo=1&numOfRows=1000&type=json")
+    .then(res => res.json())
+    .then(data => {
+      const items = data.response?.body?.items || [];
 
-fetch("https://apis.data.go.kr/15099883/openapi/villageParking/getVilageParkngInfo?serviceKey=bL5a%2BiEd3PpHNiApUoKA3l6lC5%2BPqZdMDxC2wM6P063m3wbyA3Y0FsF3h9EH08eUh9M2qX7KiuSB0OpnkxAgKQ%3D%3D&pageNo=1&numOfRows=1000&type=json")
-.then(x=>x.json())
-.then(data=>{
-var list = data.response.body.items || []
-for(var i=0;i<list.length;i++){
-var p = list[i];
-var lat = parseFloat(p.latitude);
-var lon = parseFloat(p.longitude);
-if(isNaN(lat)||isNaN(lon))continue;
-if(d(37.565784,126.938572,lat,lon)>2)continue;
-var m = new kakao.maps.Marker({
-map:map,
-position:new kakao.maps.LatLng(lat,lon),
-title:p.prkplceNm||""
-});
-var info = new kakao.maps.InfoWindow({
-content:"<div style='font-size:12px'>" + (p.prkplceNm||"") + "<br>" + (p.rdnmadr||p.lnmadr||"") + "</div>"
-});
-kakao.maps.event.addListener(m,"click",function(mk,iw){
-return function(){ iw.open(map,mk); }
-}(m,info));
-}
-});
-});
-});
+      items.forEach(p => {
+        const lat = parseFloat(p.latitude);
+        const lon = parseFloat(p.longitude);
+
+        if (!isNaN(lat) && !isNaN(lon)) {
+          new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(lat, lon)
+          });
+        }
+      });
+    });
 </script>
 
 </body>
