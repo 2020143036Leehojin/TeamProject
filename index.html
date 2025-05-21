@@ -2,48 +2,42 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>카카오 지도 + 주차장</title>
+  <title>카카오 지도</title>
   <style>
     #map { width: 100%; height: 600px; }
   </style>
+  <!-- ✅ autoload=false 제거 -->
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db558d1791180641bf3757dcfdb7f9c7"></script>
 </head>
 <body>
 
 <div id="map"></div>
 
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db558d1791180641bf3757dcfdb7f9c7&autoload=false&libraries=services"></script>
-
 <script>
-  window.onload = function () {
-    kakao.maps.load(function () {
-      // 지도 생성
-      const container = document.getElementById('map');
-      const options = {
-        center: new kakao.maps.LatLng(37.565784, 126.938572), // 연세대
-        level: 4
-      };
-      const map = new kakao.maps.Map(container, options);
-
-      // 공공데이터 API로 주차장 데이터 가져오기
-      fetch("https://apis.data.go.kr/15099883/openapi/villageParking/getVilageParkngInfo?serviceKey=bL5a%2BiEd3PpHNiApUoKA3l6lC5%2BPqZdMDxC2wM6P063m3wbyA3Y0FsF3h9EH08eUh9M2qX7KiuSB0OpnkxAgKQ%3D%3D&pageNo=1&numOfRows=1000&type=json")
-        .then(res => res.json())
-        .then(data => {
-          const items = data.response?.body?.items || [];
-
-          items.forEach(p => {
-            const lat = parseFloat(p.latitude);
-            const lon = parseFloat(p.longitude);
-            if (isNaN(lat) || isNaN(lon)) return;
-
-            // 마커 찍기
-            new kakao.maps.Marker({
-              map,
-              position: new kakao.maps.LatLng(lat, lon)
-            });
-          });
-        });
-    });
+  // ✅ kakao 객체 바로 사용 가능
+  const container = document.getElementById('map');
+  const options = {
+    center: new kakao.maps.LatLng(37.565784, 126.938572),
+    level: 4
   };
+  const map = new kakao.maps.Map(container, options);
+
+  fetch("https://apis.data.go.kr/15099883/openapi/villageParking/getVilageParkngInfo?serviceKey=bL5a%2BiEd3PpHNiApUoKA3l6lC5%2BPqZdMDxC2wM6P063m3wbyA3Y0FsF3h9EH08eUh9M2qX7KiuSB0OpnkxAgKQ%3D%3D&pageNo=1&numOfRows=1000&type=json")
+    .then(res => res.json())
+    .then(data => {
+      const items = data.response?.body?.items || [];
+
+      items.forEach(p => {
+        const lat = parseFloat(p.latitude);
+        const lon = parseFloat(p.longitude);
+        if (isNaN(lat) || isNaN(lon)) return;
+
+        new kakao.maps.Marker({
+          map,
+          position: new kakao.maps.LatLng(lat, lon)
+        });
+      });
+    });
 </script>
 
 </body>
