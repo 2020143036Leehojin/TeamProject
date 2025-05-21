@@ -9,60 +9,63 @@
       height: 600px;
     }
   </style>
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db558d1791180641bf3757dcfdb7f9c7&autoload=false"></script>
 </head>
 <body>
 
 <div id="map"></div>
 
+<!-- Kakao SDK: autoload=false로 설정 -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db558d1791180641bf3757dcfdb7f9c7&autoload=false"></script>
+
 <script>
-kakao.maps.load(function () {
+window.onload = function() {
+  kakao.maps.load(function () {
 
-  var map = new kakao.maps.Map(document.getElementById('map'), {
-    center: new kakao.maps.LatLng(37.565784, 126.938572),
-    level: 4
-  });
-
-  function dist(a, b, c, d) {
-    var r = 6371;
-    var dx = (c - a) * Math.PI / 180;
-    var dy = (d - b) * Math.PI / 180;
-    var aa = Math.sin(dx / 2) ** 2 + Math.cos(a * Math.PI / 180) * Math.cos(c * Math.PI / 180) * Math.sin(dy / 2) ** 2;
-    return r * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
-  }
-
-  fetch("https://apis.data.go.kr/15099883/openapi/villageParking/getVilageParkngInfo?serviceKey=bL5a%2BiEd3PpHNiApUoKA3l6lC5%2BPqZdMDxC2wM6P063m3wbyA3Y0FsF3h9EH08eUh9M2qX7KiuSB0OpnkxAgKQ%3D%3D&pageNo=1&numOfRows=1000&type=json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (data) {
-      var items = data.response?.body?.items || [];
-      for (var i = 0; i < items.length; i++) {
-        var p = items[i];
-        var lat = parseFloat(p.latitude);
-        var lon = parseFloat(p.longitude);
-        if (isNaN(lat) || isNaN(lon)) continue;
-        if (dist(37.565784, 126.938572, lat, lon) > 2) continue;
-
-        var marker = new kakao.maps.Marker({
-          map: map,
-          position: new kakao.maps.LatLng(lat, lon),
-          title: p.prkplceNm || ""
-        });
-
-        var info = new kakao.maps.InfoWindow({
-          content: "<div style='font-size:12px'>" + (p.prkplceNm || "") + "<br>" + (p.rdnmadr || p.lnmadr || "") + "</div>"
-        });
-
-        kakao.maps.event.addListener(marker, "click", (function (m, i) {
-          return function () {
-            i.open(map, m);
-          };
-        })(marker, info));
-      }
+    var map = new kakao.maps.Map(document.getElementById('map'), {
+      center: new kakao.maps.LatLng(37.565784, 126.938572),
+      level: 4
     });
 
-});
+    function dist(a, b, c, d) {
+      var r = 6371;
+      var dx = (c - a) * Math.PI / 180;
+      var dy = (d - b) * Math.PI / 180;
+      var aa = Math.sin(dx / 2) ** 2 + Math.cos(a * Math.PI / 180) * Math.cos(c * Math.PI / 180) * Math.sin(dy / 2) ** 2;
+      return r * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
+    }
+
+    fetch("https://apis.data.go.kr/15099883/openapi/villageParking/getVilageParkngInfo?serviceKey=bL5a%2BiEd3PpHNiApUoKA3l6lC5%2BPqZdMDxC2wM6P063m3wbyA3Y0FsF3h9EH08eUh9M2qX7KiuSB0OpnkxAgKQ%3D%3D&pageNo=1&numOfRows=1000&type=json")
+      .then(function (res) {
+        return res.json();
+      })
+      .then(function (data) {
+        var items = data.response?.body?.items || [];
+        for (var i = 0; i < items.length; i++) {
+          var p = items[i];
+          var lat = parseFloat(p.latitude);
+          var lon = parseFloat(p.longitude);
+          if (isNaN(lat) || isNaN(lon)) continue;
+          if (dist(37.565784, 126.938572, lat, lon) > 2) continue;
+
+          var marker = new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(lat, lon),
+            title: p.prkplceNm || ""
+          });
+
+          var info = new kakao.maps.InfoWindow({
+            content: "<div style='font-size:12px'>" + (p.prkplceNm || "") + "<br>" + (p.rdnmadr || p.lnmadr || "") + "</div>"
+          });
+
+          kakao.maps.event.addListener(marker, "click", (function (m, i) {
+            return function () {
+              i.open(map, m);
+            };
+          })(marker, info));
+        }
+      });
+  });
+}
 </script>
 
 </body>
